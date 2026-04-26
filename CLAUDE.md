@@ -28,8 +28,9 @@
    - **Phase 2**：解析筆記（`skills/parse-notes/SKILL.md`）
    - **Phase 3**：確認 feature 名稱（向使用者確認資料夾名）
    - **Phase 4**：套用模板（`skills/apply-template/SKILL.md`）
-   - **Phase 5**：驗證（`skills/validate-spec/SKILL.md`）
-   - **Phase 6**：寫入 `specs/{feature-name}/` + 回報
+   - **Phase 5**：結構驗證（`skills/validate-spec/SKILL.md`）
+   - **Phase 6**：寫入 `specs/{feature-name}/` 與 file-list（不回報）
+   - **Phase 7**：工程師開工就緒度 review（`skills/readiness-review/SKILL.md`）+ 合併回報給使用者
 
 ## 外部依賴
 
@@ -69,9 +70,27 @@
 
 ## 關鍵原則
 
+### CRITICAL：spec 內容必須是筆記寫的事實，禁止任何推論
+
+這是團隊最高紅線。所有 spec 內容**只能**來自筆記字面上寫的內容，不可以加：
+
+- 「合理猜測」（例：筆記沒提時間限制 → 不可寫「3 秒內回應」）
+- 「業界標準」（例：筆記沒提演算法 → 不可寫「用 BCrypt」「用 SHA-256」）
+- 「工程師會這樣做的」邏輯延伸（例：筆記說「鎖定 30 分鐘」但沒提鎖定期間如何處理新嘗試 → 不可推論「直接拒絕」）
+- 「明顯應該有的」細節（例：筆記說「跳轉 dashboard」 → 不可寫成 `/dashboard` URL）
+- 索引、約束、欄位型別細節若筆記沒給 → 不可自填
+
+筆記沒寫的內容，依下列規則標記，**禁止填空白或合理推論**：
+
+| 情境 | 標記方式 | 範例 |
+|---|---|---|
+| 筆記提到但細節缺 | `待補充：{具體缺什麼}` | 「鎖定機制 待補充：解鎖方式（自動 vs 手動）」 |
+| 筆記完全沒提，但章節必要 | `偵測不到此內容（筆記未涵蓋）` | 「鎖定期間如何處理新嘗試 → 偵測不到此內容」 |
+| 選填章節（6/7）筆記完全沒提 | 整章省略（不寫章節標題） | 章節 7 API 整章不出現 |
+
 ### 不硬編
 
-筆記沒寫的內容，**一律標記** `待補充：{具體缺什麼}`。不要憑猜測填充。Open questions 章節必須彙整所有待補充項目。
+筆記沒寫的內容，按上面紅線規則標記。Open questions 章節必須彙整所有「待補充」與「偵測不到此內容」項目。
 
 ### 先問後做
 
@@ -110,10 +129,11 @@ teams/spec-writer/
     ├── agents/
     │   └── spec-writer.md         ← 唯一 agent
     ├── skills/
-    │   ├── boss/SKILL.md          ← /boss 入口
-    │   ├── parse-notes/SKILL.md   ← 含資料夾掃描 + markitdown + file-list 管理
+    │   ├── boss/SKILL.md             ← /boss 入口
+    │   ├── parse-notes/SKILL.md      ← 含資料夾掃描 + markitdown + file-list 管理
     │   ├── apply-template/SKILL.md
-    │   └── validate-spec/SKILL.md
+    │   ├── validate-spec/SKILL.md    ← 結構合規檢查
+    │   └── readiness-review/SKILL.md ← 工程師開工就緒度 review (Phase 7)
     ├── rules/
     │   └── spec-template.md       ← 模板定義（canonical）
     └── settings.json
