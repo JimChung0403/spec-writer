@@ -1,0 +1,63 @@
+{
+  "env": {},
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(mkdir -p *)",
+      "Bash(ls *)",
+      "Bash(test *)",
+      "Bash(stat *)",
+      "Bash(command -v *)",
+      "Bash(which *)",
+      "Bash(markitdown *)"
+    ],
+    "ask": [
+      "Write",
+      "Edit",
+      "Bash(rm *)",
+      "Bash(mv *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p notes specs",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .worklog/$(date +%Y%m) && jq -r '.prompt' >> .worklog/$(date +%Y%m)/session-ledger.md 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -d specs || echo 'WARN: specs/ 資料夾不存在' >&2",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
