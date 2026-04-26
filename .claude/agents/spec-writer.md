@@ -88,9 +88,10 @@ INSUFFICIENT_DATA：偵測到輸入跨多個資料夾：
 ```
 INSUFFICIENT_DATA：偵測到需要 markitdown 才能分析的檔案，但系統未安裝。
 
-需要轉檔的檔案：
+無法分析的檔案（共 N 個，全列）：
 - notes/refund-flow/mockup.pdf (100K)
 - notes/refund-flow/requirements.docx (45K)
+- {... 其餘檔案完整列出，不可用「等」「以及其他」「共 N 個」省略}
 
 安裝指令：
   pip install 'markitdown[all]'
@@ -101,6 +102,8 @@ INSUFFICIENT_DATA：偵測到需要 markitdown 才能分析的檔案，但系統
 (b) 忽略這些檔案，只處理 .md 和 .txt 繼續
 ```
 
+**強制要求（CRITICAL）**：受影響的每個檔案都必須完整列出（路徑 + 大小），不可省略、不可彙總。即便 100 個檔案也要全列。使用者要根據完整清單判斷是否值得安裝。
+
 收到 (a) → BLOCKED，等使用者重跑。
 收到 (b) → 把這些 convertible 在 file-list 標為 unsupported（原因：「markitdown 未安裝且使用者選擇忽略」），繼續 Phase 2。
 
@@ -109,12 +112,15 @@ INSUFFICIENT_DATA：偵測到需要 markitdown 才能分析的檔案，但系統
 若 unsupported 清單非空（無論來自副檔名或 markitdown 未裝後降級），回覆使用者：
 
 ```
-以下檔案無法分析，已忽略：
-- notes/refund-flow/screenshot.png — 圖片，需 OCR
-- notes/refund-flow/demo.mp4 — 影片
+以下檔案無法分析，已忽略（共 N 個，全列）：
+- notes/refund-flow/screenshot.png (12K) — 圖片，需 OCR
+- notes/refund-flow/demo.mp4 (5.0M) — 影片
+- {... 其餘檔案完整列出，不可省略}
 
 要繼續嗎？(yes / no)
 ```
+
+**強制要求（CRITICAL）**：受影響的每個檔案都必須完整列出（路徑 + 大小 + 一句原因），不可省略、不可彙總。
 
 unsupported 全部來自副檔名（圖片、音訊等）→ 用上面格式問。
 unsupported 是 markitdown 降級造成 → 已在 1c 一起問過，這裡不再重複。

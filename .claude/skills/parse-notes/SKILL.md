@@ -102,7 +102,7 @@ command -v markitdown
 ```
 
 - 退出碼 0 → 已安裝。**立即觸發 promote-on-markitdown-install**：掃 file-list 把所有 reason 為「markitdown 未安裝且使用者選擇忽略」的 unsupported 條目改判為 changed（之後在轉檔步驟一併重轉），讓使用者裝好套件後重跑就能自動補上之前略過的檔案
-- 退出碼非 0 → 未安裝。**不要嘗試 pip install**。回報給 spec-writer Phase 1 處理（會問使用者是否忽略這些檔案）
+- 退出碼非 0 → 未安裝。**不要嘗試 pip install**。把所有需轉檔檔案的**完整清單**（路徑 + 大小，不可省略不可彙總）回報給 spec-writer Phase 1c 處理
 
 ### markitdown 轉檔
 
