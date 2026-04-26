@@ -9,7 +9,7 @@ description: 檢查 spec 草稿的完整度 驗收標準可驗證性 和 Mermaid
 
 ## 執行
 
-逐項檢查下列 6 項，任何一項 FAIL → 回頭修正，不要寫檔。
+逐項檢查下列 8 項，任何一項 FAIL → 回頭修正，不要寫檔。
 
 ### 1. 章節完整性
 
@@ -74,11 +74,40 @@ flowchart TD
 
 ### 6. Open questions 彙總
 
-掃描全 spec 找 `待補充：` 字樣，確認每一項都出現在 Open questions 章節（章節 10）。
+掃描全 spec 找 `待補充：` 與 `偵測不到此內容` 兩種字樣，確認每一項都出現在 Open questions 章節（章節 10）。
 
-- 有 `待補充` 未彙總進章節 10 → FAIL
+- 有 `待補充` 或 `偵測不到此內容` 未彙總進章節 10 → FAIL
 - 章節 10 應有「來源筆記清單」子章節，列出所有本次處理的**原始** `notes/` 檔案路徑
 - 來源筆記清單包含 `.spec-writer/converted/` 路徑 → FAIL（應列原始檔案如 `mockup.pdf`，不是轉檔結果）
+
+### 7. 推論偵測（CRITICAL — 對應團隊最高紅線）
+
+掃 spec 全文，找出可能的「筆記未涵蓋但被填了具體值」的內容。逐項對照來源筆記原文，凡是筆記沒寫的具體事實一律 FAIL：
+
+可疑模式（需逐一比對筆記）：
+- 具體秒數 / 分鐘 / 小時 / 天數（如「3 秒內」「1 小時 timeout」「7 天有效期」）
+- 具體位元數 / 長度（如「32 byte token」「VARCHAR2(500)」）
+- 具體演算法名稱（如「BCrypt」「SHA-256」「AES-256」）
+- 具體 URL / endpoint 路徑（如 `/api/login`、`/dashboard`）
+- 具體 HTTP method、status code、JSON 欄位名
+- 索引、外鍵 ON DELETE 行為、tablespace、charset、collation
+- HTTP header 名稱、認證 scheme（Bearer、Basic、JWT）
+
+驗證程序：
+1. 對每個可疑值搜尋來源筆記是否出現該值（逐字或同義）
+2. 筆記有出現 → PASS
+3. 筆記沒出現但對 spec 完整性必要 → FAIL，要求改成 `偵測不到此內容（筆記未涵蓋：{欄位名}）`
+4. 筆記沒出現也非必要（純粹是 spec 寫太細）→ FAIL，要求刪掉該值
+
+**特例**：若使用者明確指示「假設用 Oracle SQL」這類團隊級預設值（見 CLAUDE.md 技術約束）→ 不算推論。但仍不可推論具體欄位型別細節。
+
+### 8. 章節 7 互動觸發檢查
+
+掃 Requirements（章節 4）內容，搜尋互動關鍵字：「點擊 / 按鈕 / 送出 / 提交 / 跳轉 / 導向 / 寄信 / 通知 / 推播 / 後端驗證 / 寫入資料庫 / 呼叫 / 介接」。
+
+- 命中任一關鍵字但章節 7 整章省略 → FAIL，要求補上章節 7（內容若沒明寫就用 `偵測不到此內容` 標）
+- 完全未命中 → 章節 7 可省略
+- 章節 7 出現具體 endpoint 路徑（如 `POST /api/login`）但筆記未明寫 → FAIL（屬於推論違規，見項目 7）
 
 ### 驗證報告格式
 
@@ -88,12 +117,14 @@ flowchart TD
 Validation Result: PASS / PASS_WITH_WARN / FAIL
 
 Checks:
-- [✓] 章節完整性: 10/10 存在
-- [✓] 待補充比例: 2/8 空章節（PASS）
-- [✓] 資料對應表格: 欄位齊全
-- [✓] Acceptance criteria: 全部可驗證
-- [✓] Mermaid 語法: 2 個區塊正常
-- [✓] Open questions 彙總: 5 項全彙總
+- [PASS] 章節完整性: 10/10 存在
+- [PASS] 待補充比例: 2/8 空章節
+- [PASS] 資料對應表格: 欄位齊全
+- [PASS] Acceptance criteria: 全部可驗證
+- [PASS] Mermaid 語法: 2 個區塊正常
+- [PASS] Open questions 彙總: 5 項全彙總
+- [PASS] 推論偵測: 0 處可疑值
+- [PASS] 章節 7 互動觸發: 命中 3 個關鍵字、章節 7 已出
 
 Warnings:
 - (無)
@@ -108,14 +139,15 @@ Actions:
 Validation Result: FAIL
 
 Checks:
-- [✓] 章節完整性: 10/10
-- [✗] 待補充比例: 6/8 空章節 — 筆記資訊不足
-- [✓] 資料對應表格: N/A（整章待補充）
+- [PASS] 章節完整性: 10/10
+- [FAIL] 待補充比例: 6/8 空章節 — 筆記資訊不足
+- [PASS] 資料對應表格: N/A（整章待補充）
+- [FAIL] 推論偵測: 章節 4 R3「3 秒內回應」筆記未提，屬於推論
 ...
 
 Actions:
 - 不寫檔
-- spec-writer 應回 INSUFFICIENT_DATA 給使用者
+- spec-writer 應回 INSUFFICIENT_DATA 給使用者，列出具體缺什麼資訊以及哪些值是被推論出來的（要使用者確認或補資料）
 ```
 
 ## Examples
